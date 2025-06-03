@@ -12,7 +12,7 @@ const TableBody = ({ tableInstance, pagination, handlePageSizeChange, handlePage
           className="min-w-full divide-y divide-slate-100 table-fixed dark:divide-slate-700 table"
           {...getTableProps()}
         >
-          <thead className="bg-[#e6f6f0] dark:bg-slate-700">
+          <thead className="bg-purple-300 dark:bg-slate-700">
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()} className="!border-b-0">
                 {headerGroup.headers.map((column) => (

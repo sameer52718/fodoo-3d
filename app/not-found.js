@@ -21,13 +21,13 @@ export default function NotFoundPage() {
       >
         {/* 404 Text */}
         <h1 className="text-9xl font-bold text-gray-900 animate-pulse">
-          4<span className="text-red-600">0</span>4
+          4<span className="text-purple-600">0</span>4
         </h1>
 
         {/* Decorative Elements */}
         <div className="relative">
           <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-            <div className="w-24 h-1 bg-gradient-to-r from-red-600 to-purple-600 rounded-full"></div>
+            <div className="w-24 h-1 bg-gradient-to-r from-purple-600 to-purple-600 rounded-full"></div>
           </div>
         </div>
 
@@ -42,7 +42,7 @@ export default function NotFoundPage() {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
             <button
-              className="flex items-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 group"
+              className="flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 group"
               onClick={() => router.replace("/")}
             >
               <Home className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
@@ -97,7 +97,7 @@ export default function NotFoundPage() {
         <div className="mt-16 text-sm text-gray-500">
           <p>
             If you believe this is a mistake, please{" "}
-            <a href="#" className="text-red-600 hover:underline">
+            <a href="#" className="text-purple-600 hover:underline">
               report this issue
             </a>
             .

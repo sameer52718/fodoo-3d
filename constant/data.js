@@ -10,14 +10,19 @@ export const menuItems = [
     link: "/admin",
   },
   {
+    title: "User",
+    icon: "solar:user-line-duotone",
+    link: "/dashboard/user",
+  },
+  {
     title: "Category",
-    icon: "eos-icons:admin-outlined",
-    link: "/admin/category",
+    icon: "nrk:category",
+    link: "/dashboard/category",
   },
   {
     title: "Settings",
     icon: "uil:setting",
-    link: "/admin/setting",
+    link: "/setting",
   },
 ];
 

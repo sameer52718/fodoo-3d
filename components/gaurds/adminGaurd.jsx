@@ -6,13 +6,13 @@ import { useEffect } from "react";
 
 const AdminGuard = ({ children }) => {
   const router = useRouter();
-  const { user, userType } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
 
-  const isAuthenticated = Boolean(user && userType === "ADMIN");
+  const isAuthenticated = Boolean(user);
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.replace("/admin/login");
+      router.replace("/ /login");
     }
   }, [isAuthenticated, router]);
 

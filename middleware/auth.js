@@ -4,7 +4,8 @@ import jwt from "jsonwebtoken";
 export const authMiddleware = (handler, requiredRole = null) => {
   return async (req, res) => {
     try {
-      const token = req.headers.authorization?.split(" ")[1];
+      const token = req.headers.get("Authorization");
+
       if (!token) {
         return new Response(JSON.stringify({ message: "No token provided" }), {
           status: 401,
@@ -20,6 +21,7 @@ export const authMiddleware = (handler, requiredRole = null) => {
       }
       return await handler(req, res);
     } catch (error) {
+      console.error("Middle Ware Error", error);
       return new Response(JSON.stringify({ message: "Invalid token" }), {
         status: 401,
       });
