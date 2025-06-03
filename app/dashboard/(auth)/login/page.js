@@ -39,11 +39,11 @@ const Login2 = () => {
   const router = useRouter();
   const onSubmit = async (values) => {
     try {
-      const { data } = await axiosInstance.post("/admin/auth/login", values);
+      const { data } = await axiosInstance.post("/auth/login", values);
       if (!data.error) {
         const { user, token, role } = data;
         dispatch(setAuth({ user: user, token: token, userType: role }));
-        router.replace("/admin");
+        router.replace("/dashboard");
       } else {
         toast.error(data.message);
       }

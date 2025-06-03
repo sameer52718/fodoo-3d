@@ -4,7 +4,7 @@ import "./globals.css";
 import { Provider } from "react-redux";
 import store from "@/store";
 
-import "./admin/scss/app.scss";
+import "./dashboard/scss/app.scss";
 import "simplebar-react/dist/simplebar.min.css";
 import Head from "next/head";
 
