@@ -1,0 +1,11 @@
+.text-outline {
+    -webkit-text-stroke: 1px red; /* Outline width and color */
+    color: white; /* Inside text color */
+    font-weight: bold; 
+  }
+
+
+  .property-card-slider .swiper-button-prev:after, 
+  .property-card-slider .swiper-button-next:after {
+      display: none;
+  }
