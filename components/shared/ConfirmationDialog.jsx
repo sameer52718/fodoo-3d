@@ -52,7 +52,7 @@ const ConfirmationDialog = ({ isOpen, closeDialog, onConfirm }) => {
                   </button>
                   <button
                     type="button"
-                    className="inline-flex justify-center rounded-md bg-black-500 px-4 py-2 text-sm font-medium text-white shadow-sm  focus:outline-none focus:ring-2 focus:ring-black-500 focus:ring-offset-2"
+                    className="inline-flex justify-center rounded-md bg-purple-800 px-4 py-2 text-sm font-medium text-white shadow-sm  focus:outline-none focus:ring-2 focus:ring-purple-800 focus:ring-offset-2"
                     onClick={() => {
                       if (onConfirm) onConfirm();
                       closeDialog();

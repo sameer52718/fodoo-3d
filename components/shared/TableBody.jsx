@@ -112,7 +112,7 @@ const TableBody = ({ tableInstance, pagination, handlePageSizeChange, handlePage
                 <button
                   className={`${
                     pageNum === current
-                      ? "bg-black-500 dark:bg-slate-600 text-white font-medium"
+                      ? "bg-purple-800 dark:bg-slate-600 text-white font-medium"
                       : "bg-slate-100 dark:bg-slate-700 text-slate-900 font-normal"
                   } text-sm rounded flex h-6 w-6 items-center justify-center transition-all duration-150`}
                   onClick={() => handlePageChange(pageNum)}
