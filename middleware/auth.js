@@ -1,5 +1,8 @@
 // src/middleware/auth.js
 import jwt from "jsonwebtoken";
+import User from "@/models/User";
+import Folder from "@/models/Folder";
+import File from "@/models/File";
 
 export const authMiddleware = (handler, requiredRole = null) => {
   return async (req, res) => {

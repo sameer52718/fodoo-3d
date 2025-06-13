@@ -12,7 +12,7 @@ const AdminGuard = ({ children }) => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.replace("/ /login");
+      router.replace("/dashboard/login");
     }
   }, [isAuthenticated, router]);
 

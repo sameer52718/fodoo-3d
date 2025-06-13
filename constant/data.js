@@ -8,21 +8,31 @@ export const menuItems = [
     title: "Dashboard",
     icon: "heroicons-outline:home",
     link: "/admin",
+    allowedRoles: ["ADMIN", "USER"],
   },
   {
     title: "User",
     icon: "solar:user-line-duotone",
     link: "/dashboard/user",
+    allowedRoles: ["ADMIN"],
   },
   {
     title: "Category",
     icon: "nrk:category",
     link: "/dashboard/category",
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    title: "Files Manager",
+    icon: "system-uicons:files-multi",
+    link: "/dashboard/filemanager",
+    allowedRoles: ["ADMIN", "USER"],
   },
   {
     title: "Settings",
     icon: "uil:setting",
     link: "/setting",
+    allowedRoles: ["ADMIN", "USER"],
   },
 ];
 

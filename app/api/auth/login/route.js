@@ -21,11 +21,11 @@ export async function POST(req) {
     });
   }
 
-  if (user.role !== "ADMIN") {
-    return new Response(JSON.stringify({ message: "Access denied: Admins only" }), {
-      status: 403,
-    });
-  }
+  // if (user.role !== "ADMIN") {
+  //   return new Response(JSON.stringify({ message: "Access denied: Admins only" }), {
+  //     status: 403,
+  //   });
+  // }
 
   const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1d" });
   return new Response(

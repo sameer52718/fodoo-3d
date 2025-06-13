@@ -2,10 +2,11 @@ import { useRouter, usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import useMobileMenu from "@/hooks/useMobileMenu";
 import Submenu from "./Submenu";
 const Navmenu = ({ menus }) => {
+  const { userType } = useSelector((state) => state.auth);
   const router = useRouter();
   const [activeSubmenu, setActiveSubmenu] = useState(null);
 
@@ -55,7 +56,7 @@ const Navmenu = ({ menus }) => {
               ${location === item.link ? "menu-item-active" : ""}`}
           >
             {/* single menu with no childred*/}
-            {!item.child && !item.isHeadr && (
+            {!item.child && !item.isHeadr && item.allowedRoles.includes(userType) && (
               <Link className="menu-link" href={item.link}>
                 <span className="menu-icon flex-grow-0">
                   <Icon icon={item.icon} />
