@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { Folder, File, Plus, Upload, Share2, Lock, Unlock, Trash2 } from "lucide-react";
 import axiosInstance from "@/lib/axiosInstance";
 import { toast } from "react-toastify";
+import AddLinkModal from "@/components/shared/AddLinkModal";
 
 const FileManager = () => {
   const { userType: role } = useSelector((state) => state.auth);
@@ -13,6 +14,7 @@ const FileManager = () => {
   const [folderPath, setFolderPath] = useState([]); // For breadcrumb navigation
   const [newFolderName, setNewFolderName] = useState("");
   const [assignedUsers, setAssignedUsers] = useState([]);
+  const [isActive, setIsActive] = useState(false);
 
   // Fetch folders and files
   const fetchFolders = async () => {
@@ -78,21 +80,14 @@ const FileManager = () => {
   };
 
   // File operations
-  const uploadFile = async (e) => {
-    const file = e.target.files[0];
-    if (!file || !currentFolder) return toast.error("Please select a file and folder");
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("folder", currentFolder._id);
-
+  const uploadFile = async (data) => {
+    if (!data || !currentFolder) return toast.error("Please select a file and folder");
     try {
-      await axiosInstance.post("/files/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await axiosInstance.post("/files/upload", { ...data, folder: currentFolder._id });
       fetchFiles();
-      toast.success("File uploaded");
+      toast.success("Link uploaded");
     } catch (error) {
-      toast.error("Failed to upload file");
+      toast.error("Failed to upload Link");
     }
   };
 
@@ -148,11 +143,12 @@ const FileManager = () => {
               </button>
             </div>
             {currentFolder && (
-              <label className="bg-blue-500 text-white p-2 rounded cursor-pointer">
-                <Upload size={20} className="inline mr-2" />
-                Upload File
-                <input type="file" className="hidden" onChange={uploadFile} />
-              </label>
+              <button
+                onClick={() => setIsActive(true)}
+                className="bg-blue-500 text-white p-2 rounded flex items-center gap-2"
+              >
+                <Plus size={20} /> Add Link
+              </button>
             )}
           </div>
         )}
@@ -204,17 +200,18 @@ const FileManager = () => {
                 </div>
                 <div className="flex gap-2">
                   <button
+                    title={file.isPublic ? "Make Private" : "Make Public"}
                     onClick={() => toggleFilePrivacy(file._id, file.isPublic)}
                     className={`p-1 rounded ${file.isPublic ? "bg-green-500" : "bg-red-500"} text-white`}
                   >
                     {file.isPublic ? <Unlock size={16} /> : <Lock size={16} />}
                   </button>
-                  <button
+                  {/* <button
                     onClick={() => generateShareLink(file._id)}
                     className="p-1 bg-blue-500 text-white rounded"
                   >
                     <Share2 size={16} />
-                  </button>
+                  </button> */}
                 </div>
               </div>
             ))}
@@ -229,6 +226,7 @@ const FileManager = () => {
           {/* Implement user selection and assignment UI */}
         </div>
       )}
+      <AddLinkModal handleClose={() => setIsActive(false)} active={isActive} submitData={uploadFile} />
     </div>
   );
 };
