@@ -1,6 +1,6 @@
-// src/pages/api/user/index.js
 import connectDB from "@/lib/db";
 import User from "@/models/User";
+import Folder from "@/models/Folder"; // Import Folder model
 import bcrypt from "bcryptjs";
 import { authMiddleware } from "@/middleware/auth";
 
@@ -33,8 +33,22 @@ export const POST = authMiddleware(async function handler(req) {
   });
   await user.save();
 
+  // Create a root folder with the user's name
+  const folder = new Folder({
+    name: user.name,
+    parent: null, // Root folder has no parent
+    createdBy: user._id,
+    assignedUsers: [user._id], // Assign the user to their own folder
+    isDeleted: false,
+  });
+  await folder.save();
+
+  // Optionally, update the user's assignedFolders array
+  user.assignedFolders.push(folder._id);
+  await user.save();
+
   return new Response(
-    JSON.stringify({ message: "User created", user: { name, email, phone, role: user.role } }),
+    JSON.stringify({ message: "User and root folder created", user: { name, email, phone, role: user.role } }),
     {
       status: 201,
     }

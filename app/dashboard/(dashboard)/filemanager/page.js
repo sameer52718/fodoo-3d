@@ -138,14 +138,14 @@ const FileManager = () => {
                 onChange={(e) => setNewFolderName(e.target.value)}
                 className="border p-2 rounded"
               />
-              <button onClick={createFolder} className="bg-blue-500 text-white p-2 rounded">
+              <button onClick={createFolder} className="bg-purple-700 text-white p-2 rounded">
                 <Plus size={20} />
               </button>
             </div>
             {currentFolder && (
               <button
                 onClick={() => setIsActive(true)}
-                className="bg-blue-500 text-white p-2 rounded flex items-center gap-2"
+                className="bg-purple-700 text-white p-2 rounded flex items-center gap-2"
               >
                 <Plus size={20} /> Add Link
               </button>
@@ -156,7 +156,7 @@ const FileManager = () => {
 
       {/* Breadcrumb Navigation */}
       <div className="mb-4 flex items-center gap-2">
-        <button onClick={() => navigateToFolder(null)} className="text-blue-500 hover:underline">
+        <button onClick={() => navigateToFolder(null)} className="text-purple-700 hover:underline">
           Home
         </button>
       </div>
@@ -208,7 +208,7 @@ const FileManager = () => {
                   </button>
                   {/* <button
                     onClick={() => generateShareLink(file._id)}
-                    className="p-1 bg-blue-500 text-white rounded"
+                    className="p-1 bg-purple-500 text-white rounded"
                   >
                     <Share2 size={16} />
                   </button> */}
@@ -220,12 +220,11 @@ const FileManager = () => {
       )}
 
       {/* Admin: User Assignment */}
-      {role === "ADMIN" && currentFolder && (
+      {/* {role === "ADMIN" && currentFolder && (
         <div className="border p-4 rounded">
           <h2 className="text-lg font-semibold mb-2">Assign Users to Folder</h2>
-          {/* Implement user selection and assignment UI */}
         </div>
-      )}
+      )} */}
       <AddLinkModal handleClose={() => setIsActive(false)} active={isActive} submitData={uploadFile} />
     </div>
   );
