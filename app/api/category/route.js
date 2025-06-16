@@ -1,8 +1,7 @@
-// src/pages/api/category/index.js
-
 import { authMiddleware } from "@/middleware/auth";
 import connectDB from "@/lib/db";
 import Category from "@/models/Category";
+
 // CREATE: Add a new category (admin-only)
 export const POST = authMiddleware(async function handler(req) {
   await connectDB();
@@ -46,20 +45,30 @@ export const GET = authMiddleware(async function handler(req) {
       status: 400,
     });
   }
-  if (isNaN(limitNum) || limitNum < 1) {
-    return new Response(JSON.stringify({ message: "Invalid limit value" }), {
-      status: 400,
-    });
-  }
 
-  const skip = (pageNum - 1) * limitNum;
   const total = await Category.countDocuments({ isDeleted: false });
-  const categories = await Category.find({ isDeleted: false })
-    .populate("createdBy", "name")
-    .skip(skip)
-    .limit(limitNum);
 
-  const totalPages = Math.ceil(total / limitNum);
+  let categories;
+  let totalPages;
+
+  if (limitNum === -1) {
+    // Fetch all categories without pagination
+    categories = await Category.find({ isDeleted: false }).populate("createdBy", "name");
+    totalPages = 1; // Single "page" containing all items
+  } else {
+    // Apply pagination
+    if (isNaN(limitNum) || limitNum < 1) {
+      return new Response(JSON.stringify({ message: "Invalid limit value" }), {
+        status: 400,
+      });
+    }
+    const skip = (pageNum - 1) * limitNum;
+    categories = await Category.find({ isDeleted: false })
+      .populate("createdBy", "name")
+      .skip(skip)
+      .limit(limitNum);
+    totalPages = Math.ceil(total / limitNum);
+  }
 
   return new Response(
     JSON.stringify({
@@ -68,7 +77,7 @@ export const GET = authMiddleware(async function handler(req) {
         currentPage: pageNum,
         totalPages,
         totalItems: total,
-        itemsPerPage: limitNum,
+        itemsPerPage: limitNum === -1 ? total : limitNum,
       },
     }),
     {

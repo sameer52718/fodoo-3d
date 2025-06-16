@@ -9,8 +9,9 @@ const FileSchema = new mongoose.Schema(
     uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     s3Key: { type: String, required: true },
     isPublic: { type: Boolean, default: false },
-    shareLink: { type: String, unique: true },
+    shareLink: { type: String },
     isDeleted: { type: Boolean, default: false },
+    thumbnailKey: { type: String },
   },
   { timestamps: true }
 );

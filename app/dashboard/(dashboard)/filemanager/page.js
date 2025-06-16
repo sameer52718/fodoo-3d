@@ -15,9 +15,12 @@ const FileManager = () => {
   const [newFolderName, setNewFolderName] = useState("");
   const [assignedUsers, setAssignedUsers] = useState([]);
   const [isActive, setIsActive] = useState(false);
+  const [isLoadingFolders, setIsLoadingFolders] = useState(false); // Loading state for folders
+  const [isLoadingFiles, setIsLoadingFiles] = useState(false); // Loading state for files
 
-  // Fetch folders and files
+  // Fetch folders
   const fetchFolders = async () => {
+    setIsLoadingFolders(true); // Start loading
     try {
       const res = await axiosInstance.get("/folders", {
         params: { parent: currentFolder?._id || null },
@@ -25,14 +28,19 @@ const FileManager = () => {
       setFolders(res.data.folders);
     } catch (error) {
       toast.error("Failed to fetch folders");
+    } finally {
+      setIsLoadingFolders(false); // Stop loading
     }
   };
 
+  // Fetch files
   const fetchFiles = async () => {
     if (!currentFolder) {
       setFiles([]);
+      setIsLoadingFiles(false); // No loading needed if no folder
       return;
     }
+    setIsLoadingFiles(true); // Start loading
     try {
       const res = await axiosInstance.get("/files", {
         params: { folder: currentFolder._id },
@@ -40,6 +48,8 @@ const FileManager = () => {
       setFiles(res.data.files);
     } catch (error) {
       toast.error("Failed to fetch files");
+    } finally {
+      setIsLoadingFiles(false); // Stop loading
     }
   };
 
@@ -77,13 +87,24 @@ const FileManager = () => {
   // Navigate to a folder on double-click
   const navigateToFolder = async (folder) => {
     setCurrentFolder(folder);
+    setFolders([]);
+    setFiles([]);
   };
 
   // File operations
   const uploadFile = async (data) => {
     if (!data || !currentFolder) return toast.error("Please select a file and folder");
     try {
-      await axiosInstance.post("/files/upload", { ...data, folder: currentFolder._id });
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("link", data.link);
+      formData.append("folder", currentFolder._id);
+      if (data.category) formData.append("category", data.category);
+      if (data.thumbnail) formData.append("thumbnail", data.thumbnail); // Append thumbnail file
+
+      await axiosInstance.post("/files/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       fetchFiles();
       toast.success("Link uploaded");
     } catch (error) {
@@ -101,27 +122,10 @@ const FileManager = () => {
     }
   };
 
-  const generateShareLink = async (fileId) => {
-    try {
-      const res = await axiosInstance.post(`/files/${fileId}/share`);
-      console.log(res.data.shareLink);
-
-      navigator.clipboard.writeText(res.data.shareLink);
-      toast.success("Share link copied to clipboard");
-    } catch (error) {
-      toast.error("Failed to generate share link");
-    }
-  };
-
-  // User assignment
-  const assignUserToFolder = async (userId, folderId) => {
-    try {
-      await axiosInstance.patch(`/folders/${folderId}/assign`, { userId });
-      fetchFolders();
-      toast.success("User assigned to folder");
-    } catch (error) {
-      toast.error("Failed to assign user");
-    }
+  // Construct S3 URL for thumbnail (replace with your S3 bucket URL)
+  const getThumbnailUrl = (thumbnailKey) => {
+    if (!thumbnailKey) return "https://via.placeholder.com/100"; // Placeholder image
+    return `${process.env.NEXT_PUBLIC_S3_URL}${thumbnailKey}`; // Replace with your S3 bucket URL
   };
 
   return (
@@ -162,69 +166,81 @@ const FileManager = () => {
       </div>
 
       {/* Folders */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-        {folders.map((folder) => (
-          <div
-            key={folder._id}
-            className="border p-4 rounded flex items-center justify-between hover:bg-gray-100 cursor-pointer"
-            onDoubleClick={() => navigateToFolder(folder)}
-          >
-            <div className="flex items-center gap-2">
-              <Folder size={24} />
-              <span>{folder.name}</span>
-            </div>
-            {role === "ADMIN" && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  deleteFolder(folder._id);
-                }}
-                className="text-red-500"
+      <div className="mb-6">
+        {isLoadingFolders ? (
+          <div className="text-center text-gray-500">Loading folders...</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {folders.map((folder) => (
+              <div
+                key={folder._id}
+                className="border p-4 rounded flex items-center justify-between hover:bg-gray-100 cursor-pointer"
+                onDoubleClick={() => navigateToFolder(folder)}
               >
-                <Trash2 size={20} />
-              </button>
-            )}
+                <div className="flex items-center gap-2">
+                  <Folder size={24} />
+                  <span>{folder.name}</span>
+                </div>
+                {role === "ADMIN" && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteFolder(folder._id);
+                    }}
+                    className="text-red-500"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
 
       {/* Files */}
       {currentFolder && (
         <div className="mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {files.map((file) => (
-              <div key={file._id} className="border p-4 rounded flex flex-col gap-2 hover:bg-gray-100">
-                <div className="flex items-center gap-2">
-                  <File size={24} />
-                  <span>{file.name}</span>
+          {isLoadingFiles ? (
+            <div className="text-center text-gray-500">Loading files...</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {files.map((file) => (
+                <div key={file._id} className="border p-4 rounded flex flex-col gap-2 hover:bg-gray-100">
+                  {/* Thumbnail */}
+                  <div className="flex justify-center">
+                    <img
+                      src={getThumbnailUrl(file.thumbnailKey)}
+                      alt={file.name}
+                      className="w-24 h-24 object-cover rounded"
+                    />
+                  </div>
+                  {/* File Info */}
+                  <div className="flex items-center gap-2">
+                    <File size={24} />
+                    <span>{file.name}</span>
+                  </div>
+                  {/* Category */}
+                  <div className="text-sm text-gray-600">
+                    Category: {file.category?.name || "No Category"}
+                  </div>
+                  {/* Actions */}
+                  <div className="flex gap-2">
+                    <button
+                      title={file.isPublic ? "Make Private" : "Make Public"}
+                      onClick={() => toggleFilePrivacy(file._id, file.isPublic)}
+                      className={`p-1 rounded ${file.isPublic ? "bg-green-500" : "bg-red-500"} text-white`}
+                    >
+                      {file.isPublic ? <Unlock size={16} /> : <Lock size={16} />}
+                    </button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    title={file.isPublic ? "Make Private" : "Make Public"}
-                    onClick={() => toggleFilePrivacy(file._id, file.isPublic)}
-                    className={`p-1 rounded ${file.isPublic ? "bg-green-500" : "bg-red-500"} text-white`}
-                  >
-                    {file.isPublic ? <Unlock size={16} /> : <Lock size={16} />}
-                  </button>
-                  {/* <button
-                    onClick={() => generateShareLink(file._id)}
-                    className="p-1 bg-purple-500 text-white rounded"
-                  >
-                    <Share2 size={16} />
-                  </button> */}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
-      {/* Admin: User Assignment */}
-      {/* {role === "ADMIN" && currentFolder && (
-        <div className="border p-4 rounded">
-          <h2 className="text-lg font-semibold mb-2">Assign Users to Folder</h2>
-        </div>
-      )} */}
       <AddLinkModal handleClose={() => setIsActive(false)} active={isActive} submitData={uploadFile} />
     </div>
   );
