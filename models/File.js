@@ -12,6 +12,7 @@ const FileSchema = new mongoose.Schema(
     shareLink: { type: String },
     isDeleted: { type: Boolean, default: false },
     thumbnailKey: { type: String },
+    assignedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true }
 );

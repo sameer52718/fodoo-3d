@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Folder, File, Plus, Upload, Share2, Lock, Unlock, Trash2 } from "lucide-react";
+import { Folder, File, Plus, Upload, Share2, Lock, Unlock, Trash2, Eye } from "lucide-react";
 import axiosInstance from "@/lib/axiosInstance";
 import { toast } from "react-toastify";
 import AddLinkModal from "@/components/shared/AddLinkModal";
@@ -9,7 +9,7 @@ import SubmitButton from "@/components/ui/SubmitButton";
 import handleError from "@/lib/handleError";
 
 const FileManager = () => {
-  const { userType: role } = useSelector((state) => state.auth);
+  const { userType: role, user } = useSelector((state) => state.auth);
   const [folders, setFolders] = useState([]);
   const [files, setFiles] = useState([]);
   const [currentFolder, setCurrentFolder] = useState(null);
@@ -273,12 +273,19 @@ const FileManager = () => {
                   </div>
                   {/* Actions */}
                   <div className="flex gap-2">
-                    <button
+                    {(role === "ADMIN" || file.uploadedBy === user?._id) && (<button
                       title={file.isPublic ? "Make Private" : "Make Public"}
                       onClick={() => toggleFilePrivacy(file._id, file.isPublic)}
                       className={`p-1 rounded ${file.isPublic ? "bg-green-500" : "bg-red-500"} text-white`}
                     >
                       {file.isPublic ? <Unlock size={16} /> : <Lock size={16} />}
+                    </button>)}
+                    <button
+                      title={"View"}
+                      onClick={() => window.open(file.s3Key, "_blank")}
+                      className={`p-1 rounded bg-primary-500 text-white`}
+                    >
+                      <Eye size={16} />
                     </button>
                   </div>
                 </div>

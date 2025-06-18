@@ -7,7 +7,7 @@ export const menuItems = [
   {
     title: "Dashboard",
     icon: "heroicons-outline:home",
-    link: "/admin",
+    link: "/dashboard",
     allowedRoles: ["ADMIN", "USER"],
   },
   {

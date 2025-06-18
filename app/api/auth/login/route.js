@@ -32,7 +32,7 @@ export async function POST(req) {
     JSON.stringify({
       token,
       role: user.role,
-      user: { name: user.name, email: user.email, phone: user.phone },
+      user: { name: user.name, email: user.email, phone: user.phone, _id: user._id },
     }),
     {
       status: 200,

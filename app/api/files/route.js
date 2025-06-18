@@ -15,7 +15,7 @@ export const GET = authMiddleware(async function handler(req) {
 
   const query = { isDeleted: false, folder };
   if (req.user.role === "USER") {
-    query.$or = [{ uploadedBy: req.user.userId }, { isPublic: true }];
+    query.$or = [{ uploadedBy: req.user.userId }, { isPublic: true }, { assignedUsers: req.user.userId }];
   }
 
   const files = await File.find(query).populate("uploadedBy category", "name");

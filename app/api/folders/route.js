@@ -33,11 +33,22 @@ export const POST = authMiddleware(async function handler(req) {
     return new Response(JSON.stringify({ message: "Folder name is required" }), { status: 400 });
   }
 
+
+  const existingFolder = await Folder.findOne({ name, parent, isDeleted: false });
+  if (existingFolder) {
+    return new Response(JSON.stringify({ message: "Folder already exists" }), { status: 400 });
+  }
+
+  const parentFolder = parent ? await Folder.findById(parent).lean() : null;
+  if (parent && !parentFolder) {
+    return new Response(JSON.stringify({ message: "Parent folder not found" }), { status: 404 });
+  }
+
   const folder = new Folder({
     name,
     parent,
     createdBy: req.user.userId,
-    assignedUsers: [req.user.userId],
+    assignedUsers: [req.user.userId, ...parentFolder.assignedUsers],
   });
   await folder.save();
   return new Response(JSON.stringify({ message: "Folder created", folder }), { status: 201 });

@@ -1,6 +1,7 @@
 import { authMiddleware } from "@/middleware/auth";
 import connectDB from "@/lib/db";
 import File from "@/models/File";
+import Folder from "@/models/Folder";
 import { uploadToS3 } from "@/lib/s3";
 import puppeteer from 'puppeteer';
 
@@ -66,6 +67,12 @@ export const POST = authMiddleware(async function handler(req) {
       }
     }
 
+    const folderExists = await Folder.findById(folder).lean();
+    if (!folderExists) {
+      return new Response(JSON.stringify({ message: "Folder not found" }), { status: 404 });
+    }
+
+
     // Create new file entry
     const newFile = new File({
       name,
@@ -74,6 +81,7 @@ export const POST = authMiddleware(async function handler(req) {
       uploadedBy: req.user.userId,
       s3Key: link, // Store the Kuula link as s3Key
       thumbnailKey, // Store the thumbnail S3 key (null if no thumbnail)
+      assignedUsers: [req.user.userId, ...folderExists.assignedUsers],
     });
     await newFile.save();
 

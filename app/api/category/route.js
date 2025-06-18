@@ -33,7 +33,7 @@ export const POST = authMiddleware(async function handler(req) {
 }, "ADMIN");
 
 // READ: List all active categories with pagination (admin-only)
-export const GET = authMiddleware(async function handler(req) {
+export const GET = async function handler(req) {
   await connectDB();
 
   const { page = 1, limit = 10 } = req.query || {};
@@ -84,4 +84,4 @@ export const GET = authMiddleware(async function handler(req) {
       status: 200,
     }
   );
-}, "ADMIN");
+};
