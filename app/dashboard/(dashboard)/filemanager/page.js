@@ -6,6 +6,7 @@ import axiosInstance from "@/lib/axiosInstance";
 import { toast } from "react-toastify";
 import AddLinkModal from "@/components/shared/AddLinkModal";
 import SubmitButton from "@/components/ui/SubmitButton";
+import handleError from "@/lib/handleError";
 
 const FileManager = () => {
   const { userType: role } = useSelector((state) => state.auth);
@@ -18,9 +19,9 @@ const FileManager = () => {
   const [isActive, setIsActive] = useState(false);
   const [isLoadingFolders, setIsLoadingFolders] = useState(false); // Loading state for folders
   const [isLoadingFiles, setIsLoadingFiles] = useState(false); // Loading state for files
-
-  const [isFolderCreating, setIsFolderCreating] = useState(false)
-
+  const [isFolderCreating, setIsFolderCreating] = useState(false);
+  const [categories, setCategories] = useState([]); // State for categories
+  const [selectedCategory, setSelectedCategory] = useState(null); // State for selected category filter
 
   // Fetch folders
   const fetchFolders = async () => {
@@ -49,7 +50,11 @@ const FileManager = () => {
       const res = await axiosInstance.get("/files", {
         params: { folder: currentFolder._id },
       });
-      setFiles(res.data.files);
+      let filteredFiles = res.data.files;
+      if (selectedCategory) {
+        filteredFiles = filteredFiles.filter(file => file.category?._id === selectedCategory);
+      }
+      setFiles(filteredFiles);
     } catch (error) {
       toast.error("Failed to fetch files");
     } finally {
@@ -57,16 +62,29 @@ const FileManager = () => {
     }
   };
 
+  // Fetch categories
+  const fetchCategories = async () => {
+    try {
+      const res = await axiosInstance.get("/category", {
+        params: { limit: -1 }, // Fetch all categories
+      });
+      setCategories(res.data.categories);
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
   useEffect(() => {
     fetchFolders();
     fetchFiles();
-  }, [currentFolder]);
+    fetchCategories(); // Fetch categories on mount
+  }, [currentFolder, selectedCategory]); // Re-fetch files when category changes
 
   // Folder operations
   const createFolder = async () => {
     if (!newFolderName.trim()) return toast.error("Folder name is required");
     try {
-      setIsFolderCreating(true)
+      setIsFolderCreating(true);
       await axiosInstance.post("/folders", {
         name: newFolderName.trim(),
         parent: currentFolder?._id || null,
@@ -77,7 +95,7 @@ const FileManager = () => {
     } catch (error) {
       toast.error("Failed to create folder");
     } finally {
-      setIsFolderCreating(false)
+      setIsFolderCreating(false);
     }
   };
 
@@ -141,19 +159,20 @@ const FileManager = () => {
         <h1 className="text-2xl font-bold">File Manager</h1>
         {role === "ADMIN" && (
           <div className="flex gap-4">
-            {currentFolder && (<div className="flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="New Folder Name"
-                value={newFolderName}
-                onChange={(e) => setNewFolderName(e.target.value)}
-                className="border p-2 rounded"
-              />
-              <SubmitButton onClick={createFolder} type="button" isSubmitting={isFolderCreating} className="bg-purple-700 text-white p-2 rounded" >
-                <Plus size={20} />
-              </SubmitButton>
-
-            </div>)}
+            {currentFolder && (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="New Folder Name"
+                  value={newFolderName}
+                  onChange={(e) => setNewFolderName(e.target.value)}
+                  className="border p-2 rounded"
+                />
+                <SubmitButton onClick={createFolder} type="button" isSubmitting={isFolderCreating} className="bg-purple-700 text-white p-2 rounded">
+                  <Plus size={20} />
+                </SubmitButton>
+              </div>
+            )}
             {currentFolder && (
               <button
                 onClick={() => setIsActive(true)}
@@ -161,6 +180,18 @@ const FileManager = () => {
               >
                 <Plus size={20} /> Add Link
               </button>
+            )}
+            {/* Category Filter Pills */}
+            {currentFolder && (
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={() => setSelectedCategory(null)}
+                  className={`px-3 py-1 rounded-full text-sm ${!selectedCategory ? "bg-purple-700 text-white" : "bg-gray-200 text-gray-700"}`}
+                >
+                  All Categories
+                </button>
+
+              </div>
             )}
           </div>
         )}
@@ -205,7 +236,15 @@ const FileManager = () => {
           </div>
         )}
       </div>
-
+      {currentFolder && categories.map((category) => (
+        <button
+          key={category._id}
+          onClick={() => setSelectedCategory(category._id)}
+          className={`px-3 py-1 rounded-full text-sm mx-1 ${selectedCategory === category._id ? "bg-purple-700 text-white" : "bg-gray-200 text-gray-700"}`}
+        >
+          {category.name}
+        </button>
+      ))}
       {/* Files */}
       {currentFolder && (
         <div className="mb-6">
