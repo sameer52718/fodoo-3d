@@ -5,6 +5,7 @@ import { Folder, File, Plus, Upload, Share2, Lock, Unlock, Trash2 } from "lucide
 import axiosInstance from "@/lib/axiosInstance";
 import { toast } from "react-toastify";
 import AddLinkModal from "@/components/shared/AddLinkModal";
+import SubmitButton from "@/components/ui/SubmitButton";
 
 const FileManager = () => {
   const { userType: role } = useSelector((state) => state.auth);
@@ -17,6 +18,9 @@ const FileManager = () => {
   const [isActive, setIsActive] = useState(false);
   const [isLoadingFolders, setIsLoadingFolders] = useState(false); // Loading state for folders
   const [isLoadingFiles, setIsLoadingFiles] = useState(false); // Loading state for files
+
+  const [isFolderCreating, setIsFolderCreating] = useState(false)
+
 
   // Fetch folders
   const fetchFolders = async () => {
@@ -60,10 +64,11 @@ const FileManager = () => {
 
   // Folder operations
   const createFolder = async () => {
-    if (!newFolderName) return toast.error("Folder name is required");
+    if (!newFolderName.trim()) return toast.error("Folder name is required");
     try {
+      setIsFolderCreating(true)
       await axiosInstance.post("/folders", {
-        name: newFolderName,
+        name: newFolderName.trim(),
         parent: currentFolder?._id || null,
       });
       setNewFolderName("");
@@ -71,6 +76,8 @@ const FileManager = () => {
       toast.success("Folder created");
     } catch (error) {
       toast.error("Failed to create folder");
+    } finally {
+      setIsFolderCreating(false)
     }
   };
 
@@ -134,7 +141,7 @@ const FileManager = () => {
         <h1 className="text-2xl font-bold">File Manager</h1>
         {role === "ADMIN" && (
           <div className="flex gap-4">
-            <div className="flex items-center gap-2">
+            {currentFolder && (<div className="flex items-center gap-2">
               <input
                 type="text"
                 placeholder="New Folder Name"
@@ -142,10 +149,11 @@ const FileManager = () => {
                 onChange={(e) => setNewFolderName(e.target.value)}
                 className="border p-2 rounded"
               />
-              <button onClick={createFolder} className="bg-purple-700 text-white p-2 rounded">
+              <SubmitButton onClick={createFolder} type="button" isSubmitting={isFolderCreating} className="bg-purple-700 text-white p-2 rounded" >
                 <Plus size={20} />
-              </button>
-            </div>
+              </SubmitButton>
+
+            </div>)}
             {currentFolder && (
               <button
                 onClick={() => setIsActive(true)}
@@ -181,7 +189,7 @@ const FileManager = () => {
                   <Folder size={24} />
                   <span>{folder.name}</span>
                 </div>
-                {role === "ADMIN" && (
+                {role === "ADMIN" && currentFolder && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -212,7 +220,7 @@ const FileManager = () => {
                     <img
                       src={getThumbnailUrl(file.thumbnailKey)}
                       alt={file.name}
-                      className="w-24 h-24 object-cover rounded"
+                      className="w-full h-48 object-cover rounded"
                     />
                   </div>
                   {/* File Info */}

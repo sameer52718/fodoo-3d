@@ -30,15 +30,14 @@ const COLUMNS = [
   },
   {
     Header: "status",
-    accessor: (info) => (info.status ? "Public" : "Private"),
+    accessor: (info) => (info.status ? "Active" : "Deactive"),
     Cell: (row) => {
       return (
         <span className="block w-full">
           <span
-            className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
-              row?.cell?.value === "Public" ? "text-success-500 bg-success-500" : ""
-            } 
-            ${row?.cell?.value === "Private" ? "text-danger-500 bg-danger-500" : ""}
+            className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${row?.cell?.value === "Active" ? "text-success-500 bg-success-500" : ""
+              } 
+            ${row?.cell?.value === "Deactive" ? "text-danger-500 bg-danger-500" : ""}
             
              `}
           >
@@ -127,7 +126,7 @@ const UserPage = () => {
             return (
               <div className="flex space-x-3 rtl:space-x-reverse">
                 <ActionButton
-                  title={row.original.status ? "Private" : "Public"}
+                  title={row.original.status ? "Deactive" : "Active"}
                   icon={row.original.status ? "solar:lock-outline" : "mynaui:lock-open"}
                   onClick={() => handleStatusChange(row.original._id, !row.original.status)}
                 />

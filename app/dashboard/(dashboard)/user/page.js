@@ -140,7 +140,7 @@ const UserPage = () => {
             return (
               <div className="flex space-x-3 rtl:space-x-reverse">
                 <ActionButton
-                  title={row.original.status ? "Private" : "Public"}
+                  title={row.original.status ? "Deactive" : "Active"}
                   icon={row.original.status ? "solar:lock-outline" : "mynaui:lock-open"}
                   onClick={() => handleStatusChange(row.original._id, !row.original.status)}
                 />

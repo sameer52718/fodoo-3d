@@ -20,7 +20,6 @@ const schema = yup.object({
 const AddLinkModal = ({ handleClose, active, submitData }) => {
   const [categories, setCategories] = useState([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
-  const [thumbnail, setThumbnail] = useState(null);
 
   const {
     formState: { errors, isSubmitting },
@@ -52,12 +51,8 @@ const AddLinkModal = ({ handleClose, active, submitData }) => {
   }, [active]);
 
   const onSubmit = async (data) => {
-    if (!thumbnail) {
-      toast.warn("Thumbnail is required");
-      handleClose();
-      return;
-    }
-    await submitData?.({ ...data, thumbnail });
+
+    await submitData?.({ ...data });
     reset();
     handleClose();
   };
@@ -108,13 +103,7 @@ const AddLinkModal = ({ handleClose, active, submitData }) => {
           type="url"
           placeholder="Add Link"
         />
-        <Fileinput
-          label={"Select Thumbnail"}
-          preview
-          selectedFile={thumbnail}
-          onChange={(e) => setThumbnail(e.target.files[0])}
-          accept="image/*"
-        />
+
         <SubmitButton isSubmitting={isSubmitting}>Submit</SubmitButton>
       </form>
     </Modal>
