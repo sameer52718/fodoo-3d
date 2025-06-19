@@ -1,17 +1,16 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import Textinput from "@/components/ui/Textinput";
-import { handleError } from "@/lib/handleError";
+import  handleError  from "@/lib/handleError";
 import SubmitButton from "@/components/ui/SubmitButton";
 import axiosInstance from "@/lib/axiosInstance";
 import { toast } from "react-toastify";
-import logoFull from "@/path/to/logoFull"; // Adjust path to your logo asset
+import { ToastContainer } from "react-toastify";
 
 const schema = yup.object({
   password: yup.string().required("New password is Required"),
@@ -34,12 +33,12 @@ export default function ResetPassword() {
 
   const onSubmit = async (data) => {
     try {
-      const { data: res } = await axiosInstance.post("/admin/auth/change-password", data, {
+      const { data: res } = await axiosInstance.post("/auth/change-password", data, {
         headers: { Authorization: token },
       });
       if (!res.error) {
         toast.success(res.message);
-        router.push("/login");
+        router.push("/dashboard/login");
       } else {
         toast.error(res.message);
       }
@@ -49,11 +48,9 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center p-4 bg-red-600">
+    <div className="min-h-screen flex justify-center items-center p-4 bg-purple-500">
       <div className="bg-white min-w-full md:min-w-[500px] px-6 py-8 rounded-lg">
-        <div className="flex justify-center mb-4">
-          <Image src={logoFull} alt="SOV-O Logo" className="h-10 w-auto" priority />
-        </div>
+        
         <h2 className="text-xl font-semibold text-gray-800 flex items-center justify-center gap-2">
           Create Password
         </h2>
@@ -80,7 +77,7 @@ export default function ResetPassword() {
             isRequired
           />
           <div className="flex justify-between">
-            <Link href="/login" className="text-sm text-slate-800 dark:text-slate-400 leading-6 font-medium">
+            <Link href="/dashboard/login" className="text-sm text-slate-800 dark:text-slate-400 leading-6 font-medium">
               Back To Login?
             </Link>
           </div>
@@ -89,6 +86,7 @@ export default function ResetPassword() {
           </div>
         </form>
       </div>
+      <ToastContainer />
     </div>
   );
 }

@@ -7,7 +7,7 @@ import Textinput from "@/components/ui/Textinput";
 import handleError from "@/lib/handleError";
 import SubmitButton from "@/components/ui/SubmitButton";
 import axiosInstance from "@/lib/axiosInstance";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import Link from "next/link";
 const schema = yup
   .object({
@@ -27,7 +27,7 @@ const Login = () => {
 
   const onSubmit = async (data) => {
     try {
-      const { data: res } = await axiosInstance.post("/admin/auth/forgot", data);
+      const { data: res } = await axiosInstance.post("/auth/find", data);
       if (!res.error) {
         toast.success(res.message);
       } else {
@@ -72,6 +72,7 @@ const Login = () => {
             </div>
           </form>
         </div>
+        <ToastContainer />
       </div>
     </>
   );
