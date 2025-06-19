@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import User from "@/models/User";
 import Folder from "@/models/Folder";
 import File from "@/models/File";
+import connectDB from "@/lib/db";
 
 export const authMiddleware = (handler, requiredRole = null) => {
   return async (req, res) => {
@@ -16,6 +17,18 @@ export const authMiddleware = (handler, requiredRole = null) => {
       }
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+
+      // Connect to database
+      await connectDB();
+
+      // Validate session token against database
+      const user = await User.findById(decoded.userId).select("sessionToken sessionExpiresAt role email");
+      if (!user || user.sessionToken !== token || (user.sessionExpiresAt && user.sessionExpiresAt < new Date())) {
+        return NextResponse.json({ error: true, message: "Invalid or expired session" }, { status: 401 });
+      }
+
+
       req.user = decoded;
       if (requiredRole && decoded.role !== requiredRole) {
         return new Response(JSON.stringify({ message: "Access denied" }), {

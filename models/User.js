@@ -10,6 +10,8 @@ const UserSchema = new mongoose.Schema(
     assignedFolders: [{ type: mongoose.Schema.Types.ObjectId, ref: "Folder" }],
     status: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
+    sessionToken: { type: String, default: null },
+    sessionExpiresAt: { type: Date, default: null },
   },
   {
     timestamps: true,
