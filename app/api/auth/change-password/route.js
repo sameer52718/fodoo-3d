@@ -1,6 +1,7 @@
 import { authMiddleware } from "@/middleware/auth";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
+import bcrypt from "bcryptjs";
 
 // POST: Change user password
 export const POST = authMiddleware(async function handler(req) {
@@ -21,8 +22,9 @@ export const POST = authMiddleware(async function handler(req) {
             return new Response(JSON.stringify({ error: true, message: "Admin not found" }), { status: 404 });
         }
 
+        const hashedPassword = await bcrypt.hash(password, 10)
         // Update password (assuming pre-save hook in User model handles hashing)
-        admin.password = password;
+        admin.password = hashedPassword;
         await admin.save();
 
         // Return success message
