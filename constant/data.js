@@ -31,7 +31,7 @@ export const menuItems = [
   {
     title: "Settings",
     icon: "uil:setting",
-    link: "/setting",
+    link: "/dashboard/settings",
     allowedRoles: ["ADMIN", "USER"],
   },
 ];
