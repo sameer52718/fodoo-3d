@@ -1,6 +1,5 @@
 import Footer from "@/components/partials/Footer";
 import Header from "@/components/partials/Header";
-import "../../public/website/assets/css/custom.css";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";

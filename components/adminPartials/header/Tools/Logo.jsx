@@ -11,25 +11,27 @@ const Logo = () => {
 
   return (
     <div>
-      <Link href="/analytics">
+      <Link href="/dashboard">
         <React.Fragment>
           {width >= breakpoints.xl ? (
             <img
               src={
                 isDark
-                  ? "/assets/images/logo/logo-white.svg"
-                  : "/assets/images/logo/logo.svg"
+                  ? "/images/logo.png"
+                  : "/images/logo.png"
               }
               alt=""
+              className="w-12"
             />
           ) : (
             <img
               src={
                 isDark
-                  ? "/assets/images/logo/logo-c-white.svg"
-                  : "/assets/images/logo/logo-c.svg"
+                  ? "/images/logo.png"
+                  : "/images/logo.png"
               }
               alt=""
+              className="w-12"
             />
           )}
         </React.Fragment>

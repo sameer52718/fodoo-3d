@@ -57,7 +57,7 @@ const Login2 = () => {
       <div className="loginwrapper ">
         <div className="lg-inner-column ">
           <div className="right-column relative">
-            <div className="inner-content h-full flex justify-center items-center !bg-purple-800">
+            <div className="inner-content h-full flex justify-center items-center bg-purple-500">
               <div className="bg-white justify-center p-8 rounded-lg">
                 <div className="w-full md:w-[400px]  flex flex-col justify-center ">
                   <div className="text-center 2xl:mb-10 mb-4">
@@ -101,7 +101,7 @@ const Login2 = () => {
                       />
 
                       <Link
-                        href="/admin/forgot"
+                        href="/dashboard/forgot"
                         className="text-sm text-slate-800 dark:text-slate-400 leading-6 font-medium"
                       >
                         Forgot Password?{" "}

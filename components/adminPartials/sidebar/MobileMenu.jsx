@@ -36,13 +36,13 @@ const MobileMenu = ({ className = "custom-class" }) => {
           <div className="flex items-center space-x-4">
             <div className="logo-icon">
               {!isDark && !isSemiDark ? (
-                <img src="/assets/images/logo/logo-c.svg" alt="" />
+                <img src="/images/logo.png" alt="" className="w-12"/>
               ) : (
-                <img src="/assets/images/logo/logo-c-white.svg" alt="" />
+                <img src="/images/logo.png" alt="" className="w-12"/>
               )}
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Admin Logo</h1>
+              <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Fodoo</h1>
             </div>
           </div>
         </Link>

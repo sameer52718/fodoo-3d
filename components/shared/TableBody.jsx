@@ -6,17 +6,17 @@ const TableBody = ({ tableInstance, pagination, handlePageSizeChange, handlePage
   const { getTableProps, getTableBodyProps, headerGroups, prepareRow, rows } = tableInstance;
 
   return (
-    <div className="min-w-full table-custom-container hidden sm:block">
+    <div className="min-w-full table-custom-container  sm:block">
       <div className="overflow-x-auto table-custom">
         <table
           className="min-w-full divide-y divide-slate-100 table-fixed dark:divide-slate-700 table"
           {...getTableProps()}
         >
-          <thead className="bg-purple-300 dark:bg-slate-700">
+          <thead className="bg-purple-500 dark:bg-slate-700">
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()} className="!border-b-0">
                 {headerGroup.headers.map((column) => (
-                  <th {...column.getHeaderProps(column.getSortByToggleProps())} className="table-th">
+                  <th {...column.getHeaderProps(column.getSortByToggleProps())} className="table-th text-white">
                     {column.render("Header")}
                     <span>{column.isSorted ? (column.isSortedDesc ? " 🔽" : " 🔼") : ""}</span>
                   </th>
