@@ -124,8 +124,15 @@ export const POST = async function handler(req) {
             return new Response(JSON.stringify({ error: true, message: "Account Not Found." }), { status: 200 });
         }
 
-        const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1d" });
+        const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "5m" });
 
+        await User.updateOne(
+            { _id: user._id },
+            {
+                sessionToken: token,
+                sessionExpiresAt: new Date(Date.now() + 5 * 60 * 1000), // 1 day expiration
+            }
+        );
 
         const mailOptions = {
             from: `"Fodoo" <process.env.SMTP_MAIL>`,
