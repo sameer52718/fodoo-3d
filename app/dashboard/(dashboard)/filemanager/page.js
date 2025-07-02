@@ -281,14 +281,16 @@ const FileManager = () => {
                       <button
                         title={file.isPublic ? "Make Private" : "Make Public"}
                         onClick={() => toggleFilePrivacy(file._id, file.isPublic)}
-                        className={`p-2 rounded ${file.isPublic ? "bg-green-500" : "bg-red-500"} text-white hover:opacity-80 transition-opacity`}
+                        className={`p-2 rounded ${
+                          file.isPublic ? "bg-green-500" : "bg-red-500"
+                        } text-white hover:opacity-80 transition-opacity`}
                       >
                         {file.isPublic ? <Unlock size={16} /> : <Lock size={16} />}
                       </button>
                     )}
                     <button
                       title="View"
-                      onClick={() => window.open(file.s3Key, "_blank")}
+                      onClick={() => window.open(`/share/${file?._id}`)}
                       className="p-2 rounded bg-purple-500 text-white hover:bg-purple-600 transition-colors"
                     >
                       <Eye size={16} />

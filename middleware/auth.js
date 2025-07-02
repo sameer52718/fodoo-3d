@@ -12,22 +12,24 @@ export const authMiddleware = (handler, requiredRole = null) => {
 
       if (!token) {
         return new Response(JSON.stringify({ message: "No token provided" }), {
-          status: 401,
+          status: 403,
         });
       }
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
 
       // Connect to database
       await connectDB();
 
       // Validate session token against database
       const user = await User.findById(decoded.userId).select("sessionToken sessionExpiresAt role email");
-      if (!user || user.sessionToken !== token || (user.sessionExpiresAt && user.sessionExpiresAt < new Date())) {
+      if (
+        !user ||
+        user.sessionToken !== token ||
+        (user.sessionExpiresAt && user.sessionExpiresAt < new Date())
+      ) {
         return NextResponse.json({ error: true, message: "Invalid or expired session" }, { status: 401 });
       }
-
 
       req.user = decoded;
       if (requiredRole && decoded.role !== requiredRole) {
