@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Folder, File, Plus, Upload, Share2, Lock, Unlock, Trash2, Eye } from "lucide-react";
+import { Folder, File, Plus, Upload, Share2, Lock, Unlock, Trash2, Eye, Check } from "lucide-react";
 import axiosInstance from "@/lib/axiosInstance";
 import { toast } from "react-toastify";
 import AddLinkModal from "@/components/shared/AddLinkModal";
@@ -25,7 +25,10 @@ const FileManager = () => {
   const [isFolderCreating, setIsFolderCreating] = useState(false);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedFileId, setSelectedFileId] = useState(null); // Track selected file for moving
+  const [isMoving, setIsMoving] = useState(false); // Track move operation
 
+  // Fetch folders
   const fetchFolders = async () => {
     setIsLoadingFolders(true);
     try {
@@ -40,6 +43,7 @@ const FileManager = () => {
     }
   };
 
+  // Fetch files
   const fetchFiles = async () => {
     if (!currentFolder) {
       setFiles([]);
@@ -63,6 +67,7 @@ const FileManager = () => {
     }
   };
 
+  // Fetch categories
   const fetchCategories = async () => {
     try {
       const res = await axiosInstance.get("/category", {
@@ -80,6 +85,7 @@ const FileManager = () => {
     fetchCategories();
   }, [currentFolder, selectedCategory]);
 
+  // Folder operations
   const createFolder = async () => {
     if (!newFolderName.trim()) return toast.error("Folder name is required");
     try {
@@ -108,12 +114,14 @@ const FileManager = () => {
     }
   };
 
+  // Navigate to a folder
   const navigateToFolder = async (folder) => {
     setCurrentFolder(folder);
     setFolders([]);
     setFiles([]);
   };
 
+  // File operations
   const uploadFile = async (data) => {
     if (!data || !currentFolder) return toast.error("Please select a file and folder");
     try {
@@ -144,6 +152,33 @@ const FileManager = () => {
     }
   };
 
+  // Move file to current folder
+  const moveFile = async () => {
+    if (!selectedFileId || !currentFolder) return toast.error("No file or folder selected");
+    const selectedFile = files.find((file) => file._id === selectedFileId?._id);
+    console.log(selectedFile);
+    
+    if (selectedFileId.folder === currentFolder) {
+      return toast.error("File is already in this folder");
+    }
+    try {
+      setIsMoving(true);
+      await axiosInstance.patch(`/files/${selectedFileId?._id}/move`, { folderId: currentFolder._id });
+      fetchFiles();
+      toast.success("File moved successfully");
+      setSelectedFileId(null); // Clear selection
+    } catch (error) {
+      toast.error("Failed to move file");
+    } finally {
+      setIsMoving(false);
+    }
+  };
+
+  // Select file for moving
+  const selectFile = (fileId) => {
+    setSelectedFileId(fileId === selectedFileId ? null : fileId); // Toggle selection
+  };
+
   const getThumbnailUrl = (thumbnailKey) => {
     if (!thumbnailKey) return "https://via.placeholder.com/100";
     return `${process.env.NEXT_PUBLIC_S3_URL}${thumbnailKey}`;
@@ -153,37 +188,54 @@ const FileManager = () => {
     <div className="p-4 sm:p-6 max-w-[90rem] mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 className="text-xl sm:text-2xl font-bold">File Manager</h1>
-        {role === "ADMIN" && (
-          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            {currentFolder && (
-              <div className="flex items-center gap-2 w-full sm:w-auto">
-                <input
-                  type="text"
-                  placeholder="New Folder Name"
-                  value={newFolderName}
-                  onChange={(e) => setNewFolderName(e.target.value)}
-                  className="border p-2 rounded w-full sm:w-48 text-sm"
-                />
-                <SubmitButton
-                  onClick={createFolder}
-                  type="button"
-                  isSubmitting={isFolderCreating}
-                  className="bg-purple-500 text-white p-2 rounded hover:bg-purple-600 transition-colors"
-                >
-                  <Plus size={18} />
-                </SubmitButton>
-              </div>
-            )}
-            {currentFolder && (
-              <button
-                onClick={() => setIsActive(true)}
-                className="bg-purple-500 text-white p-2 rounded flex items-center gap-2 hover:bg-purple-600 transition-colors text-sm w-full sm:w-auto justify-center"
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          {currentFolder && (
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <input
+                type="text"
+                placeholder="New Folder Name"
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                className="border p-2 rounded w-full sm:w-48 text-sm"
+              />
+              <SubmitButton
+                onClick={createFolder}
+                type="button"
+                isSubmitting={isFolderCreating}
+                className="bg-purple-500 text-white p-2 rounded hover:bg-purple-600 transition-colors"
               >
-                <Plus size={18} /> Add Link
+                <Plus size={18} />
+              </SubmitButton>
+            </div>
+          )}
+          {currentFolder && (
+            <button
+              onClick={() => setIsActive(true)}
+              className="bg-purple-500 text-white p-2 rounded flex items-center gap-2 hover:bg-purple-600 transition-colors text-sm w-full sm:w-auto justify-center"
+            >
+              <Plus size={18} /> Add Link
+            </button>
+          )}
+          {selectedFileId && (
+            <div className="flex gap-2 w-full sm:w-auto">
+              <SubmitButton
+                onClick={moveFile}
+                type="button"
+                isSubmitting={isMoving}
+                className="bg-blue-500 text-white p-2 rounded flex items-center gap-2 hover:bg-blue-600 transition-colors text-sm w-full sm:w-auto justify-center"
+ Facades
+              >
+                <Check size={18} /> Confirm Move
+              </SubmitButton>
+              <button
+                onClick={() => setSelectedFileId(null)}
+                className="bg-gray-500 text-white p-2 rounded flex items-center gap-2 hover:bg-gray-600 transition-colors text-sm w-full sm:w-auto justify-center"
+              >
+                <Trash2 size={18} /> Cancel
               </button>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Breadcrumb Navigation */}
@@ -258,7 +310,9 @@ const FileManager = () => {
               {files.map((file) => (
                 <div
                   key={file._id}
-                  className="border p-4 rounded flex flex-col gap-2 hover:bg-gray-100 transition-colors"
+                  className={`border p-4 rounded flex flex-col gap-2 hover:bg-gray-100 transition-colors ${
+                    selectedFileId === file._id ? "border-blue-500 border-2" : ""
+                  }`}
                 >
                   <div className="flex justify-center">
                     <Image
@@ -278,15 +332,26 @@ const FileManager = () => {
                   </div>
                   <div className="flex gap-2">
                     {(role === "ADMIN" || file.uploadedBy === user?._id) && (
-                      <button
-                        title={file.isPublic ? "Make Private" : "Make Public"}
-                        onClick={() => toggleFilePrivacy(file._id, file.isPublic)}
-                        className={`p-2 rounded ${
-                          file.isPublic ? "bg-green-500" : "bg-red-500"
-                        } text-white hover:opacity-80 transition-opacity`}
-                      >
-                        {file.isPublic ? <Unlock size={16} /> : <Lock size={16} />}
-                      </button>
+                      <>
+                        <button
+                          title={file.isPublic ? "Make Private" : "Make Public"}
+                          onClick={() => toggleFilePrivacy(file._id, file.isPublic)}
+                          className={`p-2 rounded ${
+                            file.isPublic ? "bg-green-500" : "bg-red-500"
+                          } text-white hover:opacity-80 transition-opacity`}
+                        >
+                          {file.isPublic ? <Unlock size={16} /> : <Lock size={16} />}
+                        </button>
+                        <button
+                          title={selectedFileId?._id === file._id ? "Deselect" : "Select for Move"}
+                          onClick={() => selectFile(file)}
+                          className={`p-2 rounded ${
+                            selectedFileId?._id === file._id ? "bg-gray-500" : "bg-blue-500"
+                          } text-white hover:bg-blue-600 transition-colors`}
+                        >
+                          {selectedFileId?._id === file._id ? <Trash2 size={16} /> : <Check size={16} />}
+                        </button>
+                      </>
                     )}
                     <button
                       title="View"

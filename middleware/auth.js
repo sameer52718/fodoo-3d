@@ -28,7 +28,10 @@ export const authMiddleware = (handler, requiredRole = null) => {
         user.sessionToken !== token ||
         (user.sessionExpiresAt && user.sessionExpiresAt < new Date())
       ) {
-        return NextResponse.json({ error: true, message: "Invalid or expired session" }, { status: 401 });
+
+        return Response.json(JSON.stringify({ message: "Invalid or expired session" }), {
+          status: 401,
+        });
       }
 
       req.user = decoded;

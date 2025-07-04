@@ -1,20 +1,30 @@
 "use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import useDarkMode from "@/hooks/useDarkMode";
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Textinput from "@/components/ui/Textinput";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useRouter } from "next/navigation";
 import Checkbox from "@/components/ui/Checkbox";
 import handleError from "@/lib/handleError";
 import axiosInstance from "@/lib/axiosInstance";
 import SubmitButton from "@/components/ui/SubmitButton";
 import { useDispatch } from "react-redux";
 import { setAuth } from "@/store/auth";
-import { userTypes } from "@/constant/data";
 import { toast, ToastContainer } from "react-toastify";
+import { useSearchParams } from "next/navigation";
+
+// Child component to handle redirect logic with useSearchParams
+const RedirectHandler = ({ onLogin }) => {
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get("redirect") || "/dashboard";
+
+  return <>{onLogin(decodeURIComponent(redirectUrl))}</>;
+};
+
 const schema = yup
   .object({
     email: yup.string().email("Invalid email").required("Email is Required"),
@@ -22,9 +32,11 @@ const schema = yup
     rememberMe: yup.boolean().default(false),
   })
   .required();
+
 const Login2 = () => {
   const dispatch = useDispatch();
   const [isDark] = useDarkMode();
+  const router = useRouter();
 
   const {
     register,
@@ -36,14 +48,14 @@ const Login2 = () => {
     resolver: yupResolver(schema),
     mode: "all",
   });
-  const router = useRouter();
-  const onSubmit = async (values) => {
+
+  const onSubmit = async (values, redirectUrl = "/dashboard") => {
     try {
       const { data } = await axiosInstance.post("/auth/login", values);
       if (!data.error) {
         const { user, token, role } = data;
-        dispatch(setAuth({ user: user, token: token, userType: role }));
-        router.replace("/dashboard");
+        dispatch(setAuth({ user, token, userType: role }));
+        router.replace(redirectUrl); // Redirect to the specified URL or /dashboard
       } else {
         toast.error(data.message);
       }
@@ -54,12 +66,12 @@ const Login2 = () => {
 
   return (
     <>
-      <div className="loginwrapper ">
-        <div className="lg-inner-column ">
+      <div className="loginwrapper">
+        <div className="lg-inner-column">
           <div className="right-column relative">
             <div className="inner-content h-full flex justify-center items-center bg-purple-500">
               <div className="bg-white justify-center p-8 rounded-lg">
-                <div className="w-full md:w-[400px]  flex flex-col justify-center ">
+                <div className="w-full md:w-[400px] flex flex-col justify-center">
                   <div className="text-center 2xl:mb-10 mb-4">
                     <h4 className="font-medium">Sign in</h4>
                     <div className="text-slate-500 dark:text-slate-400 text-base">
@@ -67,7 +79,15 @@ const Login2 = () => {
                     </div>
                   </div>
 
-                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 ">
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <RedirectHandler
+                      onLogin={(redirectUrl) =>
+                        handleSubmit((values) => onSubmit(values, redirectUrl))()
+                      }
+                    />
+                  </Suspense>
+
+                  <form onSubmit={handleSubmit((values) => onSubmit(values))} className="space-y-4">
                     <Textinput
                       name="email"
                       label="email"
@@ -79,7 +99,7 @@ const Login2 = () => {
                     />
                     <Textinput
                       name="password"
-                      label="passwrod"
+                      label="password"
                       type="password"
                       register={register}
                       error={errors.password}
@@ -99,12 +119,11 @@ const Login2 = () => {
                           />
                         )}
                       />
-
                       <Link
                         href="/dashboard/forgot"
                         className="text-sm text-slate-800 dark:text-slate-400 leading-6 font-medium"
                       >
-                        Forgot Password?{" "}
+                        Forgot Password?
                       </Link>
                     </div>
                     <SubmitButton

@@ -1,16 +1,24 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 const KuulaEmbed = () => {
   const { token } = useSelector((state) => state.auth);
   const { id } = useParams();
+  const router = useRouter();
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState("loading");
 
   useEffect(() => {
+    // Redirect to login if no token
+    if (!token) {
+      const redirectUrl = encodeURIComponent(window.location.pathname);
+      router.push(`/dashboard/login?redirect=${redirectUrl}`);
+      return;
+    }
+
     if (!id) return;
 
     const fetchFile = async () => {
@@ -21,7 +29,11 @@ const KuulaEmbed = () => {
           },
         });
         if (res.status === 404) return setStatus("notfound");
-        if (res.status === 403) return setStatus("unauthorized");
+        if (res.status === 403 || res.status === 401) {
+          const redirectUrl = encodeURIComponent(window.location.pathname);
+          router.push(`/dashboard/login?redirect=${redirectUrl}`);
+          return;
+        }
         if (!res.ok) throw new Error("Unexpected error");
 
         const data = await res.json();
@@ -34,7 +46,7 @@ const KuulaEmbed = () => {
     };
 
     fetchFile();
-  }, [id]);
+  }, [id, token, router]);
 
   const renderContent = () => {
     switch (status) {
