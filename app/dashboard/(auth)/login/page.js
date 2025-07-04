@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import useDarkMode from "@/hooks/useDarkMode";
 import React, { useState, Suspense } from "react";
 import Textinput from "@/components/ui/Textinput";
@@ -15,14 +15,15 @@ import SubmitButton from "@/components/ui/SubmitButton";
 import { useDispatch } from "react-redux";
 import { setAuth } from "@/store/auth";
 import { toast, ToastContainer } from "react-toastify";
-import { useSearchParams } from "next/navigation";
 
-// Child component to handle redirect logic with useSearchParams
-const RedirectHandler = ({ onLogin }) => {
+// Child component to extract redirect URL
+const RedirectUrlFetcher = ({ setRedirectUrl }) => {
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get("redirect") || "/dashboard";
-
-  return <>{onLogin(decodeURIComponent(redirectUrl))}</>;
+  React.useEffect(() => {
+    setRedirectUrl(decodeURIComponent(redirectUrl));
+  }, [searchParams, setRedirectUrl]);
+  return null; // No UI, just sets the redirect URL
 };
 
 const schema = yup
@@ -37,6 +38,7 @@ const Login2 = () => {
   const dispatch = useDispatch();
   const [isDark] = useDarkMode();
   const router = useRouter();
+  const [redirectUrl, setRedirectUrl] = useState("/dashboard");
 
   const {
     register,
@@ -49,7 +51,7 @@ const Login2 = () => {
     mode: "all",
   });
 
-  const onSubmit = async (values, redirectUrl = "/dashboard") => {
+  const onSubmit = async (values) => {
     try {
       const { data } = await axiosInstance.post("/auth/login", values);
       if (!data.error) {
@@ -79,15 +81,11 @@ const Login2 = () => {
                     </div>
                   </div>
 
-                  <Suspense fallback={<div>Loading...</div>}>
-                    <RedirectHandler
-                      onLogin={(redirectUrl) =>
-                        handleSubmit((values) => onSubmit(values, redirectUrl))()
-                      }
-                    />
+                  <Suspense fallback={<div className="text-center text-gray-500">Loading...</div>}>
+                    <RedirectUrlFetcher setRedirectUrl={setRedirectUrl} />
                   </Suspense>
 
-                  <form onSubmit={handleSubmit((values) => onSubmit(values))} className="space-y-4">
+                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <Textinput
                       name="email"
                       label="email"
