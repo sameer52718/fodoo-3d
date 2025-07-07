@@ -4,12 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Folder, File, Plus, Upload, Share2, Lock, Unlock, Trash2, Eye, Check } from "lucide-react";
+import { Folder, File, Plus, Upload, Share2, Edit, Lock, Unlock, Trash2, Eye, Check } from "lucide-react";
 import axiosInstance from "@/lib/axiosInstance";
 import { toast } from "react-toastify";
 import AddLinkModal from "@/components/shared/AddLinkModal";
 import SubmitButton from "@/components/ui/SubmitButton";
 import handleError from "@/lib/handleError";
+import RenameFolderModal from "@/components/shared/RenameFolderModal";
 
 const FileManager = () => {
   const { userType: role, user } = useSelector((state) => state.auth);
@@ -27,6 +28,9 @@ const FileManager = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedFileId, setSelectedFileId] = useState(null); // Track selected file for moving
   const [isMoving, setIsMoving] = useState(false); // Track move operation
+  const [renameModalActive, setRenameModalActive] = useState(false);
+  const [folderToRename, setFolderToRename] = useState(null);
+
 
   // Fetch folders
   const fetchFolders = async () => {
@@ -66,6 +70,19 @@ const FileManager = () => {
       setIsLoadingFiles(false);
     }
   };
+
+  const renameFolder = async (newName) => {
+    if (!folderToRename) return;
+    try {
+      await axiosInstance.put(`/folders/${folderToRename._id}`, { name: newName });
+      toast.success("Folder renamed");
+      setFolderToRename(null);
+      fetchFolders();
+    } catch (error) {
+      toast.error("Failed to rename folder");
+    }
+  };
+
 
   // Fetch categories
   const fetchCategories = async () => {
@@ -157,7 +174,7 @@ const FileManager = () => {
     if (!selectedFileId || !currentFolder) return toast.error("No file or folder selected");
     const selectedFile = files.find((file) => file._id === selectedFileId?._id);
     console.log(selectedFile);
-    
+
     if (selectedFileId.folder === currentFolder) {
       return toast.error("File is already in this folder");
     }
@@ -223,7 +240,7 @@ const FileManager = () => {
                 type="button"
                 isSubmitting={isMoving}
                 className="bg-blue-500 text-white p-2 rounded flex items-center gap-2 hover:bg-blue-600 transition-colors text-sm w-full sm:w-auto justify-center"
- Facades
+                Facades
               >
                 <Check size={18} /> Confirm Move
               </SubmitButton>
@@ -249,9 +266,8 @@ const FileManager = () => {
         <div className="flex gap-2 flex-wrap mb-6">
           <button
             onClick={() => setSelectedCategory(null)}
-            className={`px-3 py-1 rounded-full text-sm ${
-              !selectedCategory ? "bg-purple-500 text-white" : "bg-gray-200 text-gray-700"
-            } hover:bg-purple-400 hover:text-white transition-colors`}
+            className={`px-3 py-1 rounded-full text-sm ${!selectedCategory ? "bg-purple-500 text-white" : "bg-gray-200 text-gray-700"
+              } hover:bg-purple-400 hover:text-white transition-colors`}
           >
             All Categories
           </button>
@@ -259,9 +275,8 @@ const FileManager = () => {
             <button
               key={category._id}
               onClick={() => setSelectedCategory(category._id)}
-              className={`px-3 py-1 rounded-full text-sm ${
-                selectedCategory === category._id ? "bg-purple-500 text-white" : "bg-gray-200 text-gray-700"
-              } hover:bg-purple-400 hover:text-white transition-colors`}
+              className={`px-3 py-1 rounded-full text-sm ${selectedCategory === category._id ? "bg-purple-500 text-white" : "bg-gray-200 text-gray-700"
+                } hover:bg-purple-400 hover:text-white transition-colors`}
             >
               {category.name}
             </button>
@@ -285,16 +300,31 @@ const FileManager = () => {
                   <span className="text-sm truncate max-w-[150px]">{folder.name}</span>
                 </div>
                 {role === "ADMIN" && currentFolder && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteFolder(folder._id);
-                    }}
-                    className="text-red-500 hover:text-red-700 p-1"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setFolderToRename(folder);
+                        setRenameModalActive(true);
+                      }}
+                      className="text-blue-500 hover:text-blue-700 p-1"
+                      title="Rename Folder"
+                    >
+                      <Edit />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteFolder(folder._id);
+                      }}
+                      className="text-red-500 hover:text-red-700 p-1"
+                      title="Delete Folder"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                 )}
+
               </div>
             ))}
           </div>
@@ -310,9 +340,8 @@ const FileManager = () => {
               {files.map((file) => (
                 <div
                   key={file._id}
-                  className={`border p-4 rounded flex flex-col gap-2 hover:bg-gray-100 transition-colors ${
-                    selectedFileId === file._id ? "border-blue-500 border-2" : ""
-                  }`}
+                  className={`border p-4 rounded flex flex-col gap-2 hover:bg-gray-100 transition-colors ${selectedFileId === file._id ? "border-blue-500 border-2" : ""
+                    }`}
                 >
                   <div className="flex justify-center">
                     <Image
@@ -336,18 +365,16 @@ const FileManager = () => {
                         <button
                           title={file.isPublic ? "Make Private" : "Make Public"}
                           onClick={() => toggleFilePrivacy(file._id, file.isPublic)}
-                          className={`p-2 rounded ${
-                            file.isPublic ? "bg-green-500" : "bg-red-500"
-                          } text-white hover:opacity-80 transition-opacity`}
+                          className={`p-2 rounded ${file.isPublic ? "bg-green-500" : "bg-red-500"
+                            } text-white hover:opacity-80 transition-opacity`}
                         >
                           {file.isPublic ? <Unlock size={16} /> : <Lock size={16} />}
                         </button>
                         <button
                           title={selectedFileId?._id === file._id ? "Deselect" : "Select for Move"}
                           onClick={() => selectFile(file)}
-                          className={`p-2 rounded ${
-                            selectedFileId?._id === file._id ? "bg-gray-500" : "bg-blue-500"
-                          } text-white hover:bg-blue-600 transition-colors`}
+                          className={`p-2 rounded ${selectedFileId?._id === file._id ? "bg-gray-500" : "bg-blue-500"
+                            } text-white hover:bg-blue-600 transition-colors`}
                         >
                           {selectedFileId?._id === file._id ? <Trash2 size={16} /> : <Check size={16} />}
                         </button>
@@ -369,6 +396,15 @@ const FileManager = () => {
       )}
 
       <AddLinkModal handleClose={() => setIsActive(false)} active={isActive} submitData={uploadFile} />
+      <RenameFolderModal
+        active={renameModalActive}
+        handleClose={() => {
+          setRenameModalActive(false);
+          setFolderToRename(null);
+        }}
+        currentName={folderToRename?.name || ""}
+        onRename={renameFolder}
+      />
     </div>
   );
 };
