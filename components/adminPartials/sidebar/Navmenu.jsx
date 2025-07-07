@@ -5,6 +5,7 @@ import Icon from "@/components/ui/Icon";
 import { useDispatch, useSelector } from "react-redux";
 import useMobileMenu from "@/hooks/useMobileMenu";
 import Submenu from "./Submenu";
+
 const Navmenu = ({ menus }) => {
   const { userType } = useSelector((state) => state.auth);
   const router = useRouter();
@@ -26,16 +27,10 @@ const Navmenu = ({ menus }) => {
 
   useEffect(() => {
     let submenuIndex = null;
-    menus.map((item, i) => {
+    menus.forEach((item, i) => {
       if (!item.child) return;
-      if (item.link === locationName) {
-        submenuIndex = null;
-      } else {
-        const ciIndex = item.child.findIndex((ci) => ci.childlink === locationName);
-        if (ciIndex !== -1) {
-          submenuIndex = i;
-        }
-      }
+      const found = item.child.some((ci) => ci.childlink === locationName);
+      if (found) submenuIndex = i;
     });
 
     setActiveSubmenu(submenuIndex);
@@ -44,19 +39,35 @@ const Navmenu = ({ menus }) => {
     }
   }, [router, location]);
 
+  const isAllowed = (roles) => roles?.includes(userType);
+
+  const shouldRenderItem = (item) => {
+    if (item.isHeadr) return true;
+    if (item.allowedRoles && isAllowed(item.allowedRoles)) return true;
+    if (item.child) {
+      return item.child.some((child) => isAllowed(child.allowedRoles));
+    }
+    return false;
+  };
+
   return (
-    <>
-      <ul>
-        {menus.map((item, i) => (
+    <ul>
+      {menus.map((item, i) => {
+        if (!shouldRenderItem(item)) return null;
+
+        return (
           <li
             key={i}
-            className={` single-sidebar-menu 
+            className={`single-sidebar-menu 
               ${item.child ? "item-has-children" : ""}
               ${activeSubmenu === i ? "open" : ""}
               ${location === item.link ? "menu-item-active" : ""}`}
           >
-            {/* single menu with no childred*/}
-            {!item.child && !item.isHeadr && item.allowedRoles.includes(userType) && (
+            {/* Only label */}
+            {item.isHeadr && !item.child && <div className="menulabel">{item.title}</div>}
+
+            {/* Simple Link */}
+            {!item.child && !item.isHeadr && isAllowed(item.allowedRoles) && (
               <Link className="menu-link" href={item.link}>
                 <span className="menu-icon flex-grow-0">
                   <Icon icon={item.icon} />
@@ -65,37 +76,46 @@ const Navmenu = ({ menus }) => {
                 {item.badge && <span className="menu-badge">{item.badge}</span>}
               </Link>
             )}
-            {/* only for menulabel */}
-            {item.isHeadr && !item.child && <div className="menulabel">{item.title}</div>}
-            {/*    !!sub menu parent   */}
+
+            {/* Parent with Children */}
             {item.child && (
-              <div
-                className={`menu-link ${activeSubmenu === i ? "parent_active not-collapsed" : "collapsed"}`}
-                onClick={() => toggleSubmenu(i)}
-              >
-                <div className="flex-1 flex items-start">
-                  <span className="menu-icon">
-                    <Icon icon={item.icon} />
-                  </span>
-                  <div className="text-box">{item.title}</div>
-                </div>
-                <div className="flex-0">
-                  <div
-                    className={`menu-arrow transform transition-all duration-300 ${
-                      activeSubmenu === i ? " rotate-90" : ""
-                    }`}
-                  >
-                    <Icon icon="heroicons-outline:chevron-right" />
+              <>
+                <div
+                  className={`menu-link ${activeSubmenu === i ? "parent_active not-collapsed" : "collapsed"}`}
+                  onClick={() => toggleSubmenu(i)}
+                >
+                  <div className="flex-1 flex items-start">
+                    <span className="menu-icon">
+                      <Icon icon={item.icon} />
+                    </span>
+                    <div className="text-box">{item.title}</div>
+                  </div>
+                  <div className="flex-0">
+                    <div
+                      className={`menu-arrow transform transition-all duration-300 ${
+                        activeSubmenu === i ? " rotate-90" : ""
+                      }`}
+                    >
+                      <Icon icon="heroicons-outline:chevron-right" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
 
-            <Submenu activeSubmenu={activeSubmenu} item={item} i={i} locationName={locationName} />
+                <Submenu
+                  activeSubmenu={activeSubmenu}
+                  item={{
+                    ...item,
+                    child: item.child.filter((ci) => isAllowed(ci.allowedRoles)),
+                  }}
+                  i={i}
+                  locationName={locationName}
+                />
+              </>
+            )}
           </li>
-        ))}
-      </ul>
-    </>
+        );
+      })}
+    </ul>
   );
 };
 

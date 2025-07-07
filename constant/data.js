@@ -10,11 +10,25 @@ export const menuItems = [
     link: "/dashboard",
     allowedRoles: ["ADMIN", "USER"],
   },
-  {
-    title: "User",
-    icon: "solar:user-line-duotone",
-    link: "/dashboard/user",
+
+    {
+    title: 'User',
+    icon: 'solar:user-line-duotone',
+    isOpen: true,
+    isHide: true,
     allowedRoles: ["ADMIN"],
+    child: [
+      {
+        childtitle: 'Add User',
+        childlink: "/dashboard/user/add",
+        allowedRoles: ["ADMIN"],
+      },
+      {
+        childtitle: 'User Manager',
+        childlink: "/dashboard/user",
+        allowedRoles: ["ADMIN"],
+      },
+    ],
   },
   {
     title: "Category",

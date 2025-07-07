@@ -75,3 +75,27 @@ export const DELETE = authMiddleware(async function handler(req, context) {
     status: 200,
   });
 }, "ADMIN");
+
+
+// GET: Get a single user by ID (admin-only)
+export const GET = authMiddleware(async function handler(req, context) {
+  await connectDB();
+
+  const { id } = context.params || {};
+  if (!id) {
+    return new Response(JSON.stringify({ message: "User ID is required" }), {
+      status: 400,
+    });
+  }
+
+  const user = await User.findOne({ _id: id, isDeleted: false }).select("-password");
+  if (!user) {
+    return new Response(JSON.stringify({ message: "User not found" }), {
+      status: 404,
+    });
+  }
+
+  return new Response(JSON.stringify({ user }), {
+    status: 200,
+  });
+}, "ADMIN");
