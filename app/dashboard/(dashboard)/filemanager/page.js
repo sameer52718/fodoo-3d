@@ -1,36 +1,46 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Folder, File, Plus, Upload, Share2, Edit, Lock, Unlock, Trash2, Eye, Check } from "lucide-react";
+import { Folder, File, Plus, Edit, Lock, Unlock, Trash2, Eye, Check, CopyIcon } from "lucide-react";
 import axiosInstance from "@/lib/axiosInstance";
 import { toast } from "react-toastify";
 import AddLinkModal from "@/components/shared/AddLinkModal";
 import SubmitButton from "@/components/ui/SubmitButton";
 import handleError from "@/lib/handleError";
 import RenameFolderModal from "@/components/shared/RenameFolderModal";
+import RenameFileModal from "@/components/shared/RenameFileModal";
 
 const FileManager = () => {
   const { userType: role, user } = useSelector((state) => state.auth);
   const [folders, setFolders] = useState([]);
   const [files, setFiles] = useState([]);
   const [currentFolder, setCurrentFolder] = useState(null);
-  const [folderPath, setFolderPath] = useState([]);
   const [newFolderName, setNewFolderName] = useState("");
-  const [assignedUsers, setAssignedUsers] = useState([]);
   const [isActive, setIsActive] = useState(false);
   const [isLoadingFolders, setIsLoadingFolders] = useState(false);
   const [isLoadingFiles, setIsLoadingFiles] = useState(false);
   const [isFolderCreating, setIsFolderCreating] = useState(false);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedFileId, setSelectedFileId] = useState(null); // Track selected file for moving
-  const [isMoving, setIsMoving] = useState(false); // Track move operation
+  const [selectedFileId, setSelectedFileId] = useState(null);
+  const [isMoving, setIsMoving] = useState(false);
   const [renameModalActive, setRenameModalActive] = useState(false);
   const [folderToRename, setFolderToRename] = useState(null);
+  const [renameModal, setRenameModal] = useState(false);
+  const [fileToRename, setFileToRename] = useState(null);
 
+  const openRenameModal = (file) => {
+    setFileToRename(file);
+    setRenameModal(true);
+  };
+
+  const closeRenameModal = (refresh = false) => {
+    setRenameModal(false);
+    setFileToRename(null);
+    if (refresh) fetchFiles();
+  };
 
   // Fetch folders
   const fetchFolders = async () => {
@@ -225,7 +235,7 @@ const FileManager = () => {
               </SubmitButton>
             </div>
           )}
-          {currentFolder && (
+          {currentFolder && role === "ADMIN" && (
             <button
               onClick={() => setIsActive(true)}
               className="bg-purple-500 text-white p-2 rounded flex items-center gap-2 hover:bg-purple-600 transition-colors text-sm w-full sm:w-auto justify-center"
@@ -262,7 +272,7 @@ const FileManager = () => {
         </button>
       </div>
 
-      {currentFolder && (
+      {currentFolder && role === "ADMIN" && (
         <div className="flex gap-2 flex-wrap mb-6">
           <button
             onClick={() => setSelectedCategory(null)}
@@ -378,6 +388,13 @@ const FileManager = () => {
                         >
                           {selectedFileId?._id === file._id ? <Trash2 size={16} /> : <Check size={16} />}
                         </button>
+                        <button
+                          title="Rename"
+                          onClick={() => openRenameModal(file)}
+                          className="p-2 rounded bg-yellow-500 text-white hover:bg-yellow-600 transition-colors"
+                        >
+                          <Edit />
+                        </button>
                       </>
                     )}
                     <button
@@ -386,6 +403,25 @@ const FileManager = () => {
                       className="p-2 rounded bg-purple-500 text-white hover:bg-purple-600 transition-colors"
                     >
                       <Eye size={16} />
+                    </button>
+                    <button
+                      title="Copy"
+                      onClick={async () => {
+                        try {
+                          if (typeof window !== "undefined" && navigator?.clipboard?.writeText) {
+                            const url = `${window.location.origin}/share/${file?._id}`;
+                            await navigator.clipboard.writeText(url);
+                            toast.success("Link copied to clipboard");
+                          } else {
+                            toast.error("Clipboard API not supported in your browser");
+                          }
+                        } catch (err) {
+                          toast.error("Failed to copy link");
+                        }
+                      }}
+                      className="p-2 rounded bg-red-500 text-white hover:bg-red-600 transition-colors"
+                    >
+                      <CopyIcon size={16} />
                     </button>
                   </div>
                 </div>
@@ -404,6 +440,11 @@ const FileManager = () => {
         }}
         currentName={folderToRename?.name || ""}
         onRename={renameFolder}
+      />
+      <RenameFileModal
+        active={renameModal}
+        file={fileToRename}
+        handleClose={closeRenameModal}
       />
     </div>
   );

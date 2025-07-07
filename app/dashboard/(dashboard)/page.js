@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import axiosInstance from '@/lib/axiosInstance';
 import handleError from '@/lib/handleError';
+import { useSelector } from 'react-redux';
 
 export default function DashboardHome() {
+  const { user, userType } = useSelector(state => state.auth)
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -34,7 +36,7 @@ export default function DashboardHome() {
   return (
     <div className="min-h-screen p-4 sm:p-6 max-w-7xl mx-auto bg-gray-100">
       <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">
-        Dashboard Overview
+        Dashboard Overview {userType === "USER" && user?.name}
       </h1>
 
       {loading ? (
