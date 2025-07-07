@@ -33,8 +33,16 @@ export const menuItems = [
   {
     title: "Category",
     icon: "nrk:category",
-    link: "/dashboard/category",
+    isOpen: true,
+    isHide: true,
     allowedRoles: ["ADMIN"],
+    child: [
+      {
+        childtitle: 'File Category',
+        childlink: "/dashboard/category",
+        allowedRoles: ["ADMIN"],
+      },
+    ],
   },
   {
     title: "Files Manager",

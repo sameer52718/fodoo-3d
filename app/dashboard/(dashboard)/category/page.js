@@ -13,6 +13,7 @@ import usePaginate from "@/hooks/usePaginate";
 import ConfirmationDialog from "@/components/shared/ConfirmationDialog";
 import useConfirmationDialog from "@/hooks/useConfirmationDialog";
 import AddButton from "@/components/shared/AddButton";
+import { useRouter } from "next/navigation";
 const COLUMNS = [
   {
     Header: "Name",
@@ -50,6 +51,7 @@ const COLUMNS = [
 ];
 
 const UserPage = () => {
+  const router = useRouter()
   const columns = useMemo(() => COLUMNS, []);
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState([]);
@@ -129,6 +131,11 @@ const UserPage = () => {
                   title={row.original.status ? "Deactive" : "Active"}
                   icon={row.original.status ? "solar:lock-outline" : "mynaui:lock-open"}
                   onClick={() => handleStatusChange(row.original._id, !row.original.status)}
+                />
+                <ActionButton
+                  title="Edit"
+                  icon={"uil:edit"}
+                  onClick={() => router.push(`/dashboard/category/${row.original._id}/edit`)}
                 />
                 <ActionButton
                   title="Delete"

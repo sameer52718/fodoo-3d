@@ -63,3 +63,28 @@ export const DELETE = authMiddleware(async function handler(req, context) {
     status: 200,
   });
 }, "ADMIN");
+
+
+// GET: Get a single category by ID (admin-only)
+export const GET = authMiddleware(async function handler(req, context) {
+  await connectDB();
+
+  const { id } = context.params || {};
+
+  if (!id) {
+    return new Response(JSON.stringify({ message: "Category ID is required" }), {
+      status: 400,
+    });
+  }
+
+  const category = await Category.findOne({ _id: id, isDeleted: false });
+  if (!category) {
+    return new Response(JSON.stringify({ message: "Category not found" }), {
+      status: 404,
+    });
+  }
+
+  return new Response(JSON.stringify({ category }), {
+    status: 200,
+  });
+}, "ADMIN");
