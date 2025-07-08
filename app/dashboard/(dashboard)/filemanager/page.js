@@ -93,7 +93,6 @@ const FileManager = () => {
     }
   };
 
-
   // Fetch categories
   const fetchCategories = async () => {
     try {
@@ -276,8 +275,9 @@ const FileManager = () => {
         <div className="flex gap-2 flex-wrap mb-6">
           <button
             onClick={() => setSelectedCategory(null)}
-            className={`px-3 py-1 rounded-full text-sm ${!selectedCategory ? "bg-purple-500 text-white" : "bg-gray-200 text-gray-700"
-              } hover:bg-purple-400 hover:text-white transition-colors`}
+            className={`px-3 py-1 rounded-full text-sm ${
+              !selectedCategory ? "bg-purple-500 text-white" : "bg-gray-200 text-gray-700"
+            } hover:bg-purple-400 hover:text-white transition-colors`}
           >
             All Categories
           </button>
@@ -285,8 +285,9 @@ const FileManager = () => {
             <button
               key={category._id}
               onClick={() => setSelectedCategory(category._id)}
-              className={`px-3 py-1 rounded-full text-sm ${selectedCategory === category._id ? "bg-purple-500 text-white" : "bg-gray-200 text-gray-700"
-                } hover:bg-purple-400 hover:text-white transition-colors`}
+              className={`px-3 py-1 rounded-full text-sm ${
+                selectedCategory === category._id ? "bg-purple-500 text-white" : "bg-gray-200 text-gray-700"
+              } hover:bg-purple-400 hover:text-white transition-colors`}
             >
               {category.name}
             </button>
@@ -309,7 +310,7 @@ const FileManager = () => {
                   <Folder size={20} />
                   <span className="text-sm truncate max-w-[150px]">{folder.name}</span>
                 </div>
-                {role === "ADMIN" && currentFolder && (
+                {currentFolder && (
                   <div className="flex gap-2">
                     <button
                       onClick={(e) => {
@@ -334,7 +335,6 @@ const FileManager = () => {
                     </button>
                   </div>
                 )}
-
               </div>
             ))}
           </div>
@@ -350,8 +350,9 @@ const FileManager = () => {
               {files.map((file) => (
                 <div
                   key={file._id}
-                  className={`border p-4 rounded flex flex-col gap-2 hover:bg-gray-100 transition-colors ${selectedFileId === file._id ? "border-blue-500 border-2" : ""
-                    }`}
+                  className={`border p-4 rounded flex flex-col gap-2 hover:bg-gray-100 transition-colors ${
+                    selectedFileId === file._id ? "border-blue-500 border-2" : ""
+                  }`}
                 >
                   <div className="flex justify-center">
                     <Image
@@ -375,28 +376,30 @@ const FileManager = () => {
                         <button
                           title={file.isPublic ? "Make Private" : "Make Public"}
                           onClick={() => toggleFilePrivacy(file._id, file.isPublic)}
-                          className={`p-2 rounded ${file.isPublic ? "bg-green-500" : "bg-red-500"
-                            } text-white hover:opacity-80 transition-opacity`}
+                          className={`p-2 rounded ${
+                            file.isPublic ? "bg-green-500" : "bg-red-500"
+                          } text-white hover:opacity-80 transition-opacity`}
                         >
                           {file.isPublic ? <Unlock size={16} /> : <Lock size={16} />}
                         </button>
-                        <button
-                          title={selectedFileId?._id === file._id ? "Deselect" : "Select for Move"}
-                          onClick={() => selectFile(file)}
-                          className={`p-2 rounded ${selectedFileId?._id === file._id ? "bg-gray-500" : "bg-blue-500"
-                            } text-white hover:bg-blue-600 transition-colors`}
-                        >
-                          {selectedFileId?._id === file._id ? <Trash2 size={16} /> : <Check size={16} />}
-                        </button>
-                        <button
-                          title="Rename"
-                          onClick={() => openRenameModal(file)}
-                          className="p-2 rounded bg-yellow-500 text-white hover:bg-yellow-600 transition-colors"
-                        >
-                          <Edit />
-                        </button>
                       </>
                     )}
+                    <button
+                      title={selectedFileId?._id === file._id ? "Deselect" : "Select for Move"}
+                      onClick={() => selectFile(file)}
+                      className={`p-2 rounded ${
+                        selectedFileId?._id === file._id ? "bg-gray-500" : "bg-blue-500"
+                      } text-white hover:bg-blue-600 transition-colors`}
+                    >
+                      {selectedFileId?._id === file._id ? <Trash2 size={16} /> : <Check size={16} />}
+                    </button>
+                    <button
+                      title="Rename"
+                      onClick={() => openRenameModal(file)}
+                      className="p-2 rounded bg-yellow-500 text-white hover:bg-yellow-600 transition-colors"
+                    >
+                      <Edit />
+                    </button>
                     <button
                       title="View"
                       onClick={() => window.open(`/share/${file?._id}`)}
@@ -441,11 +444,7 @@ const FileManager = () => {
         currentName={folderToRename?.name || ""}
         onRename={renameFolder}
       />
-      <RenameFileModal
-        active={renameModal}
-        file={fileToRename}
-        handleClose={closeRenameModal}
-      />
+      <RenameFileModal active={renameModal} file={fileToRename} handleClose={closeRenameModal} />
     </div>
   );
 };

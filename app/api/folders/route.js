@@ -24,15 +24,14 @@ export const GET = authMiddleware(async function handler(req) {
 // POST: Create a new folder (admin-only)
 export const POST = authMiddleware(async function handler(req) {
   await connectDB();
-  if (req.user.role !== "ADMIN") {
-    return new Response(JSON.stringify({ message: "Access denied" }), { status: 403 });
-  }
+  // if (req.user.role !== "ADMIN") {
+  //   return new Response(JSON.stringify({ message: "Access denied" }), { status: 403 });
+  // }
 
   const { name, parent } = await req.json();
   if (!name) {
     return new Response(JSON.stringify({ message: "Folder name is required" }), { status: 400 });
   }
-
 
   const existingFolder = await Folder.findOne({ name, parent, isDeleted: false });
   if (existingFolder) {
@@ -52,4 +51,4 @@ export const POST = authMiddleware(async function handler(req) {
   });
   await folder.save();
   return new Response(JSON.stringify({ message: "Folder created", folder }), { status: 201 });
-}, "ADMIN");
+});
